@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as THREE from 'three'
+import * as dat from 'dat.gui'
 
 function Viewport() {
     useEffect(() => {
         console.log("executed");
         const canvas = document.querySelector('canvas.webgl');
+
+
+        // Debug
+        const gui = new dat.GUI()
 
         // Scene
 
@@ -20,11 +25,10 @@ function Viewport() {
             '/environment/nz.png'
         ])
 
-        console.log(environmentMapTexture)
-
+        // environmentMapTexture.MinFilter = THREE.LinearFilter
         const scene = new THREE.Scene()
 
-        scene.background  = environmentMapTexture;
+        scene.background = environmentMapTexture;
 
         /**
          * Objects
@@ -35,6 +39,11 @@ function Viewport() {
         )
 
         scene.add(character)
+
+        gui.add(character.position, "x", -3, 3, 0.01);
+        gui.add(character.position, "y", -3, 3, 0.01);
+        gui.add(character.position, "z", -3, 3, 0.01);
+
 
         /**
  * Sizes
@@ -83,7 +92,7 @@ function Viewport() {
          * Animate
          */
         const clock = new THREE.Clock()
-
+        
         const tick = () => {
             const elapsedTime = clock.getElapsedTime()
 
@@ -103,7 +112,6 @@ function Viewport() {
     }, []);
     return (
         <div>
-            <h1>A new star is born.</h1>
             <canvas class="webgl"></canvas>
         </div>
 
