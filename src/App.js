@@ -133,7 +133,7 @@ function App() {
       soundtrack.setBuffer(buffer);
       soundtrack.setLoop(true);
       soundtrack.setVolume(0.5);
-      // soundtrack.play();
+      soundtrack.play();
     });
 
     audioLoader.load('boostfx.mp3', function (buffer) {
