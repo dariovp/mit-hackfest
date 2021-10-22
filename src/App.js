@@ -39,7 +39,7 @@ function App() {
     scene.background = environmentMapTexture;
 
     const axesHelper = new THREE.AxesHelper(5);
-    scene.add(axesHelper);
+    // scene.add(axesHelper);
 
     //Texture Loader
 
