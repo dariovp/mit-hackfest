@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import typefaceFont from 'three/examples/fonts/helvetiker_regular.typeface.json'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader'
 import * as THREE from 'three'
@@ -18,7 +19,7 @@ function App() {
     const canvas = document.querySelector('canvas.webgl');
     // const raycaster = new THREE.Raycaster()
     // Debug
-    const gui = new dat.GUI()
+    // const gui = new dat.GUI()
 
 
     const keys = { forward: false, boost: false }
@@ -45,7 +46,9 @@ function App() {
 
     const loadingManager = new THREE.LoadingManager()
     const textureLoader = new THREE.TextureLoader(loadingManager)
-    const colorTexture = textureLoader.load("/color.jpg")
+    const colorTexture = textureLoader.load("/logo.png");
+    const alphaTexture = textureLoader.load("/alphamap.png")
+
 
     //Model Loader
 
@@ -133,7 +136,6 @@ function App() {
       soundtrack.setBuffer(buffer);
       soundtrack.setLoop(true);
       soundtrack.setVolume(0.5);
-      soundtrack.play();
     });
 
     audioLoader.load('boostfx.mp3', function (buffer) {
@@ -166,21 +168,29 @@ function App() {
      */
 
     // const character = new THREE.Group()
-    // scene.add(character)
 
     //Character
     const character = new THREE.Mesh(
       new THREE.SphereGeometry(0.5, 16, 16),
-      new THREE.MeshBasicMaterial({ color: 'white', map: colorTexture, side: THREE.DoubleSide })
+      new THREE.MeshBasicMaterial({ color: "light", side: THREE.DoubleSide })
     )
+
+    character.position.y = 0;
 
     // const ref = new THREE.Mesh(
     //   new THREE.SphereGeometry(0.5, 8, 8),
     //   new THREE.MeshBasicMaterial({ color: 'red', })
     // )
 
-    scene.add(character);
+    const logo = new THREE.Mesh(
+      new THREE.PlaneGeometry(16, 8),
+      new THREE.MeshBasicMaterial({ map: colorTexture, transparent: true, })
+    )
 
+    logo.position.z = -5
+    // logo.position.y = 4
+
+    scene.add(logo);
 
     // movement - please calibrate these values
 
@@ -219,6 +229,31 @@ function App() {
     controls.maxDistance = 6;
     controls.minDistance = 6;
     controls.enablePan = false;
+    controls.minPolarAngle = 1.8;
+    controls.maxPolarAngle = 1.8;
+    controls.minAzimuthAngle = 0;
+    controls.maxAzimuthAngle = 0;
+
+    //Start Experience
+
+    function startExperience(){
+      boostfx.play()
+      keys.forward = true;
+
+      setTimeout(function () {
+        logo.visible = false;
+        keys.forward = false;
+        controls.minPolarAngle = 0;
+        controls.maxPolarAngle = Math.PI;
+        controls.minAzimuthAngle = Infinity;
+        controls.maxAzimuthAngle = Infinity;
+        scene.add(character);
+      }, 2500)
+    }
+
+    startExperience()
+    
+
 
 
     //Comets
@@ -226,7 +261,7 @@ function App() {
     const sphereGeo = new THREE.SphereGeometry(0.3, 30, 30);
     let cometArr = [];
 
-    function randomPos(target){
+    function randomPos(target) {
       target.position.x = (Math.random() - 0.5) * 100;
       target.position.y = (Math.random() - 0.5) * 100;
       target.position.z = (Math.random() - 0.5) * 100;
@@ -235,9 +270,9 @@ function App() {
       target.rotation.y = Math.random() * Math.PI
     }
 
-    function eatingSound(){
+    function eatingSound() {
       let rndSound = Math.ceil(Math.random() * 4)
-      switch(rndSound){
+      switch (rndSound) {
         case 1:
           eating1.play()
           break;
@@ -253,7 +288,7 @@ function App() {
       }
     }
 
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 35; i++) {
 
       const comet = new THREE.Mesh(sphereGeo, Material);
       randomPos(comet);
@@ -293,30 +328,8 @@ function App() {
       // Update controls
       controls.update()
 
-      // console.log(character.position.distanceTo(camera.position))
-      // character.rotation.y = -controls.getPolarAngle()
-      character.lookAt(camera.position)
+      logo.position.y = 4 + Math.sin(elapsedTime) / 4
 
-      //Raycaster
-      // const rayDirection = new Vector3().copy(character.position).sub(camera.position).normalize();
-      // raycaster.set(character.position, rayDirection)
-
-      // const intersect = raycaster.intersectObjects(cometArr)
-
-      // if(intersect.length > 0){
-      //   intersect.forEach((hit)=> {
-      //     if(hit.distance < 0.3){
-      //       hit.object.visible = false;
-      //       energy++
-      //       console.log(energy)
-      //     }
-      //   })
-      // }
-
-      // scene.add(new THREE.ArrowHelper(raycaster.ray.direction, raycaster.ray.origin, 300, 0xff0000) );
-
-
-      // console.log("intersect", intersect)
 
       if (keys.forward == true) {
         character.position.add(new Vector3().copy(character.position).sub(camera.position).normalize().divide(new Vector3(speed, speed, speed)))
@@ -334,7 +347,7 @@ function App() {
 
       //comets
       cometArr.forEach(function (item, i) {
-        item.position.lerp(comeTar[i + arrCount], 0.0005)
+        item.position.lerp(comeTar[i + arrCount], 0.0003)
         if (character.position.distanceTo(item.position) < 1) {
           randomPos(item);
           eatingSound();
@@ -347,7 +360,7 @@ function App() {
       if (genCounter > timeRare) {
         timeRare = timeRare + 10;
         comeTar = [];
-        for (let i = 0; i < 50; i++) {
+        for (let i = 0; i < 35; i++) {
           let rngTarget = new Vector3((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
           comeTar.push(rngTarget);
         }
@@ -376,8 +389,6 @@ function App() {
   return (
 
     <div>
-      {/* <Scoring energy = {energy}></Scoring>
-      <h1>energy {energy}</h1> */}
       <canvas class="webgl"></canvas>
     </div>
 
