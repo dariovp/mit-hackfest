@@ -4,6 +4,7 @@ import typefaceFont from 'three/examples/fonts/helvetiker_regular.typeface.json'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader'
 import * as THREE from 'three'
+import { Canvas, useFrame } from '@react-three/fiber'
 import * as dat from 'dat.gui'
 import './App.css';
 import Scoring from "./Components/scoring"
@@ -12,15 +13,17 @@ import { Vector3 } from 'three';
 
 
 function App() {
-  const [energy, setEnergy] = useState(0);
+  const [panel, setPanel] = useState(false);
+
+  let energy = 0;
+  let panelOn = false;
+  // let resizeOn = 1;
 
   useEffect(() => {
-    console.log("executed");
     const canvas = document.querySelector('canvas.webgl');
     // const raycaster = new THREE.Raycaster()
     // Debug
     // const gui = new dat.GUI()
-
 
     const keys = { forward: false, boost: false }
     // Scene
@@ -62,21 +65,65 @@ function App() {
     // )
 
     const gltfLoader = new GLTFLoader()
-    gltfLoader.load(
-      'user.gltf',
-      (gltf) => {
-        console.log(gltf)
-        scene.add(gltf.scene[0])
-        gltf.scene.position.set(0, 0, 0);
+    let character;
+    let ref;
+    let comet;
+    let cometArr = [];
+    let portArr = [];
 
+    gltfLoader.load(
+      'comet.gltf',
+      (model) => {
+        model.scene.scale.set(0.2, 0.2, 0.2)
+
+        for (let i = 0; i < 20; i++) {
+          model.scene.name = i;
+          model.scene.position.set(((Math.random() - 0.5) * 50), ((Math.random() - 0.5) * 50), ((Math.random() - 0.5) * 50));
+          model.scene.rotation.x = Math.random() * Math.PI
+          model.scene.rotation.y = Math.random() * Math.PI
+          cometArr.push(model.scene);
+          scene.add(model.scene.clone())
+        }
+        generateTargets()
       }
     )
+
+    gltfLoader.load(
+      'avatar.gltf',
+      (model) => {
+        model.scene.position.set(0, 0, 0);
+        model.scene.name = "character"
+        model.scene.scale.set(0.5, 0.5, 0.5)
+        scene.add(model.scene)
+        character = scene.getObjectByName("character");
+        controls.target = character.position;
+      }
+    )
+
+    gltfLoader.load(
+      'stand.gltf',
+      (model) => {
+        for (let i = 0; i < 5; i++) {
+          for (let x = 0; x < 5; x++) {
+            model.scene.name = "ref" + (i * x);
+            model.scene.position.set(i * 10, x * 10, i * 10);
+            portArr.push(model.scene.clone());
+            scene.add(model.scene.clone())
+          }
+        }
+
+          scene.add(model.scene)
+        }
+    )
+
+
     // environmentMapTexture.MinFilter = THREE.LinearFilter
 
 
     /**
   * Sizes
   */
+
     const sizes = {
       width: window.innerWidth,
       height: window.innerHeight
@@ -170,12 +217,10 @@ function App() {
     // const character = new THREE.Group()
 
     //Character
-    const character = new THREE.Mesh(
-      new THREE.SphereGeometry(0.5, 16, 16),
-      new THREE.MeshBasicMaterial({ color: "light", side: THREE.DoubleSide })
-    )
-
-    character.position.y = 0;
+    // const character = new THREE.Mesh(
+    //   new THREE.SphereGeometry(0.5, 16, 16),
+    //   new THREE.MeshBasicMaterial({ color: "light", side: THREE.DoubleSide })
+    // )
 
     // const ref = new THREE.Mesh(
     //   new THREE.SphereGeometry(0.5, 8, 8),
@@ -187,14 +232,22 @@ function App() {
       new THREE.MeshBasicMaterial({ map: colorTexture, transparent: true, })
     )
 
+
     logo.position.z = -5
     // logo.position.y = 4
 
-    scene.add(logo);
+    scene.add(logo, ref);
 
     // movement - please calibrate these values
 
     var speed = 8;
+
+    const light = new THREE.AmbientLight(0xffffff, 4);
+    scene.add(light);
+
+    const light2 = new THREE.PointLight(0xff0000, 1, 100);
+    light2.position.set(1, 1, 1);
+    scene.add(light2);
 
     document.addEventListener("keydown", onDocumentKeyDown, false);
     function onDocumentKeyDown(event) {
@@ -203,7 +256,6 @@ function App() {
         //Character position
         keys["forward"] = true
       } else if (keyCode == 16) {
-        console.log("boost");
         keys["boost"] = true;
       }
     }
@@ -215,17 +267,14 @@ function App() {
         //Character position
         keys["forward"] = false
       } else if (keyCode == 16) {
-        console.log("boost");
         keys["boost"] = false;
       }
     }
-
 
     // Controls
     const controls = new OrbitControls(camera, canvas)
     controls.enableDamping = true;
     OrbitControls.enableKeys = false;
-    controls.target = character.position;
     controls.maxDistance = 6;
     controls.minDistance = 6;
     controls.enablePan = false;
@@ -236,8 +285,9 @@ function App() {
 
     //Start Experience
 
-    function startExperience(){
+    function startExperience() {
       boostfx.play()
+      speed = 30;
       keys.forward = true;
 
       setTimeout(function () {
@@ -248,27 +298,15 @@ function App() {
         controls.minAzimuthAngle = Infinity;
         controls.maxAzimuthAngle = Infinity;
         scene.add(character);
-      }, 2500)
+      }, 6000)
     }
 
     startExperience()
-    
-
-
 
     //Comets
     const Material = new THREE.MeshMatcapMaterial({ color: 'orange' });
     const sphereGeo = new THREE.SphereGeometry(0.3, 30, 30);
-    let cometArr = [];
 
-    function randomPos(target) {
-      target.position.x = (Math.random() - 0.5) * 100;
-      target.position.y = (Math.random() - 0.5) * 100;
-      target.position.z = (Math.random() - 0.5) * 100;
-
-      target.rotation.x = Math.random() * Math.PI
-      target.rotation.y = Math.random() * Math.PI
-    }
 
     function eatingSound() {
       let rndSound = Math.ceil(Math.random() * 4)
@@ -288,14 +326,6 @@ function App() {
       }
     }
 
-    for (let i = 0; i < 35; i++) {
-
-      const comet = new THREE.Mesh(sphereGeo, Material);
-      randomPos(comet);
-
-      cometArr.push(comet);
-      scene.add(comet)
-    }
 
     /**
      * Animate
@@ -313,17 +343,26 @@ function App() {
         comeTar.push(rngTarget);
       })
 
-      console.log("init", comeTar)
     }
-
-    generateTargets()
-
-    let arrCount = 0;
 
     const tick = () => {
       const elapsedTime = clock.getElapsedTime()
-
       genCounter = elapsedTime;
+
+      if (cometArr.length > 0) {
+        cometArr.forEach((item, i) => {
+          let targ = scene.getObjectByName(i);
+          targ.rotation.z += 0.01;
+        })
+      }
+
+      //Upgradeable
+      sizes.width = window.innerWidth;
+      camera.aspect = sizes.width / sizes.height
+      camera.updateProjectionMatrix()
+
+      // Update renderer
+      renderer.setSize(sizes.width, sizes.height)
 
       // Update controls
       controls.update()
@@ -331,7 +370,7 @@ function App() {
       logo.position.y = 4 + Math.sin(elapsedTime) / 4
 
 
-      if (keys.forward == true) {
+      if (keys.forward == true && character) {
         character.position.add(new Vector3().copy(character.position).sub(camera.position).normalize().divide(new Vector3(speed, speed, speed)))
       }
 
@@ -345,22 +384,46 @@ function App() {
       // console.log("DISTANCE", character.position)
 
 
-      //comets
-      cometArr.forEach(function (item, i) {
-        item.position.lerp(comeTar[i + arrCount], 0.0003)
-        if (character.position.distanceTo(item.position) < 1) {
-          randomPos(item);
-          eatingSound();
-          // changeEnergy()
+      if (cometArr.length > 0) {
+        cometArr.forEach(function (item, i) {
+          let cometSui = scene.getObjectByName(i);
+          cometSui.position.lerp(comeTar[i], 0.0003)
+          if (character && character.position.distanceTo(cometSui.position) < 1) {
+            console.log("dssdads", character.position.distanceTo(cometSui.position))
+            cometSui.position.set((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
+            cometSui.rotation.x = Math.random() * Math.PI
+            cometSui.rotation.y = Math.random() * Math.PI
+            eatingSound();
+            console.log("eattt")
+            energy = energy + 1;
+          }
+        })
+      }
+
+
+      if (character && portArr.length > 0) {
+        let sw = false;
+        portArr.forEach((item) => {
+          if (character.position.distanceTo(item.position) < 5) {
+            console.log(character.position.distanceTo(item.position));
+            setPanel(true);
+            sw = true;
+          }
+        })
+
+        if (sw == false) {
+          setPanel(false);
         }
-      })
+      }
+
+
 
       // console.log("GC", genCounter)
 
       if (genCounter > timeRare) {
         timeRare = timeRare + 10;
         comeTar = [];
-        for (let i = 0; i < 35; i++) {
+        for (let i = 0; i < 20; i++) {
           let rngTarget = new Vector3((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
           comeTar.push(rngTarget);
         }
@@ -376,9 +439,6 @@ function App() {
 
     tick()
 
-    console.log("xDDD")
-
-
   }, []);
 
   // function changeEnergy(){
@@ -387,9 +447,70 @@ function App() {
   // }
 
   return (
+    <div id="viewport">
+      {panel == true && <div id="menuPanel">
+        <img class="logoStyle" src="maylandLogo.png"></img>
+        <div class="prInfo">
+          <h1>Mayland Labs</h1>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. </p>
 
-    <div>
-      <canvas class="webgl"></canvas>
+          <h2 class="title">Members</h2>
+
+          <div className="roles">
+            <div class="card1">
+              <h3>Joaquín Quiroga</h3>
+              <div class="skills">
+                <div class="skill">UX/UI</div>
+                <div class="skill">Full Stack</div>
+              </div>
+            </div>
+
+            <div class="card1">
+              <h3>Tomas Garcia </h3>
+              <div class="skills">
+                <div class="skill">UX/UI</div>
+                <div class="skill">Full Stack</div>
+              </div>
+            </div>
+
+            <div class="card1">
+              <h3>Dario Paz</h3>
+              <div class="skills">
+                <div class="skill">UX/UI</div>
+              </div>
+            </div>
+          </div>
+
+          <h2 class="title">Required</h2>
+
+          <div className="roles">
+            <div class="card2">
+              <div class="skillHeader">
+                <h3>Frontend Developer</h3>
+                <div class="skills">
+                  <div class="apply">Apply</div>
+                </div>
+              </div>
+              <p class="roleDesc">Lorem ipsum dolor sit amet, consectetur adipiscing. t enim ad minim veniam, quis nostrud exercitation ullamco laboris.</p>
+            </div>
+
+            <div class="card2">
+              <div class="skillHeader">
+                <h3>Unity Developer</h3>
+                <div class="skills">
+                  <div class="apply">Apply</div>
+                </div>
+
+              </div>
+              <p class="roleDesc">Lorem ipsum dolor sit amet, consectetur adipiscing. t enim ad minim veniam, quis nostrud exercitation ullamco laboris</p>
+
+            </div>
+          </div>
+        </div>
+      </div>}
+      <div class="camera">
+        <canvas class="webgl"></canvas>
+      </div>
     </div>
 
   )

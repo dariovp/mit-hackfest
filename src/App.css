@@ -38,3 +38,126 @@ html, body {margin: 0; height: 100%; overflow: hidden}
     transform: rotate(360deg);
   }
 }
+
+#viewport{
+  width:100vw;
+  height:100vh;
+  display: flex;
+  flex-direction: row;
+
+}
+
+#menuPanel{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 20%;
+  height: 100%;
+  background-color: white;
+  position: absolute;
+  z-index:100;
+  top:0px;
+  right:0px;
+  overflow-y:auto;
+}
+
+.prInfo{
+  padding: 30px;
+}
+
+.members{
+  display: flex;
+  flex-direction: column;
+  height: 50%;
+}
+
+.memberRow{
+  display: flex;
+  flex-direction: row;
+}
+
+.roles{
+  display: flex;
+  flex-direction: column;
+  justify-content:flex-start;
+  width: 100%;
+}
+
+.card1{
+  margin-top: 1rem;
+  height: 2rem;
+  width: 100%;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+}
+
+.card2{
+  margin-top: 1rem;
+  height: 100%;
+  width: 100%;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+}
+.webgl{
+  width:300px;
+}
+
+.logoStyle{
+  width: 100%;
+}
+
+.skills{
+  display: flex;
+  flex-direction: row;
+}
+
+.skill{
+  margin-left: 2rem;
+  display:flex;
+  justify-content: center;
+  border-radius: 10px;
+  height: 1.2rem;
+  padding: 0.4rem;
+  width: 4rem;
+  font-weight: bold;
+  font-size: 14px;
+  color: white;
+  background-color: #b03596;
+}
+
+.apply{
+  margin-left: 2rem;
+  border: 1px solid #b03596;
+  display:flex;
+  justify-content: center;
+  border-radius: 10px;
+  height: 2rem;
+  padding: 0.1rem;
+  width: 8rem;
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #b03596;
+}
+
+.apply:hover{
+  background-color: #b03596;
+  color: white;
+}
+
+.title{
+  color: #b03596;
+}
+
+.skillHeader{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.roleDesc{
+  width: 80%;
+}
