@@ -1,0 +1,19 @@
+.container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	width: 100%;
+}
+
+.buttonLogin {
+	background: linear-gradient(180deg, #FD1A80 0%, #971484 100%);
+	opacity: 0.8;
+	border: 0px solid #FD1A80;
+	width: 12.625rem;
+}
+
+.image {
+	width: 25.563rem
+}

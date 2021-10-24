@@ -1,0 +1,46 @@
+.image {
+	height: 8rem;
+	margin: 1rem 1rem;
+}
+
+.btnAdd {
+	background: transparent;
+	outline-width: 4px;
+	border: 0px;
+	margin: 0 2rem;
+	line-height: 34px;
+	display: flex;
+	align-items: center;
+	text-align: center;
+}
+
+.btnAdd:hover, .btnAdd:focus, .btnAdd:active, .btnAdd.active, .open > .dropdown-toggle.btnAdd {
+	outline-width: 4px;
+}
+
+.team {
+	margin-left: 1rem;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: min-content;
+}
+
+.searchbar {
+	box-shadow: 1px 2px 10px rgba(0, 0, 0, 0.25);
+	border-radius: 80px;
+	width: 39.063rem;
+	height: 3rem;
+}
+
+.searchBtn {
+	position: absolute;
+	right: 0;
+	height: 3rem;
+	width: 3rem;
+	padding: 0.5rem;
+}
+
+.logo {
+	color: white;
+}
