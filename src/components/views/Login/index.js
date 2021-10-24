@@ -1,11 +1,14 @@
 /** @jsxImportSource theme-ui */
 import { useState } from "react";
-import Button from 'react-bootstrap/Button'
+import { useHistory } from 'react-router-dom';
+import Button from 'react-bootstrap/Button';
 import { theme } from "../../../theme";
 import styles from "./Login.module.css";
 import axios from "axios";
 
 export function Login() {
+
+	let history = useHistory();
 
 	const [userData, setUserData] = useState({
 		firstName: '',
@@ -21,8 +24,7 @@ export function Login() {
 
 	async function handleSubmit(e) {
 		e.preventDefault();
-		await axios.post("http://localhost:8000/authusers/", { url: "sdad" })
-			.then(result => console.log("sdas", result))
+		history.push("/home")
 	}
 
 	return (

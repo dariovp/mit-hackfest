@@ -1,14 +1,23 @@
+import { useState } from "react";
 import { Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { Experience } from "../Experience";
 import styles from "./Home.module.css";
 
 function Home() {
+
+	const [launch, setLaunch] = useState(false);
+
 	return (
 		<section className="vw-100 vh-100 ">
+			<Experience launch={launch} />
 			<div className={styles.container}>
-				<img src="/hackfestLogo.png" alt="..." className={styles.image} />
+				<div className={styles.image} />
 				<div className="d-flex flex-row justify-content-start align-content-center">
-					<Button className={`${styles.buttonEnter} rounded-pill`}>
+					<Button
+						className={`${styles.buttonEnter} rounded-pill`}
+						onClick={() => setLaunch(true)}
+					>
 						Enter
 					</Button>
 
